@@ -9,11 +9,13 @@ function parseDBRecordToResponse(dbData) {
     return dbData
         .map((elm) => {
         return {
-            id: elm.ID,
-            name: elm.Name,
-            district: elm.District,
-            countryCode: elm.CountryCode,
-            population: elm.Population
+            id: elm.id,
+            cityName: elm.cityName,
+            countryName: elm.countryName,
+            district: elm.district,
+            continent: elm.continent,
+            countryCode: elm.countryCode,
+            population: elm.population
         };
     });
 }
@@ -21,18 +23,23 @@ const countriesController = {
     getCountries: (req, res, next) => {
         // console.log(req.query);
         if (!Object.keys(req.query).length) {
-            db_1.default.execute('SELECT * FROM world.city')
+            db_1.default.execute(`SELECT cities.name as cityName, countries.name as countryName, countries.code as countryCode, countries.continent as continent, cities.population as population
+            FROM world.city as cities LEFT JOIN world.country as countries ON cities.CountryCode = countries.Code`)
                 .then((data) => {
+                console.log(data[0]);
                 const responseData = parseDBRecordToResponse(data[0]);
+                console.log(responseData);
                 res.status(200).json(responseData);
             })
                 .catch((err) => {
             });
         }
         else {
-            const searchParamsKeys = Object.keys(req.query).map((key) => `city.${countries_types_1.ResponseToDBParamsMap[key]} = ?`).join(' AND ');
+            const searchParamsKeys = Object.keys(req.query).map((key) => `${countries_types_1.ColumnKeyToTable[key]}.${countries_types_1.ResponseToDBParamsMap[key]} = ?`).join(' AND ');
             const searchParamsValues = Object.keys(req.query).map((key) => req.query[key]);
-            db_1.default.execute(`SELECT * FROM world.city WHERE ${searchParamsKeys}`, searchParamsValues)
+            console.log(req.query, searchParamsKeys, searchParamsValues);
+            db_1.default.execute(`SELECT cities.name as cityName, countries.name as countryName, countries.code as countryCode, countries.continent as continent, cities.population as population
+            FROM world.city as cities LEFT JOIN world.country as countries ON cities.CountryCode = countries.Code WHERE ${searchParamsKeys}`, searchParamsValues)
                 .then((data) => {
                 const responseData = parseDBRecordToResponse(data[0]);
                 res.status(200).json(responseData);

@@ -1,8 +1,8 @@
 import { Router } from 'express';
-import countriesController from '../controllers/dictionaries';
+import dictionariesController from '../controllers/dictionaries';
 
 const router = Router();
 
-router.get('/', countriesController.getCountries);
+router.get('/', dictionariesController.getCountries);
 
 export default router;
