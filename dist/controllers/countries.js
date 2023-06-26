@@ -32,12 +32,12 @@ function checkQueryForParams(queries) {
             searchFields[key] = queries[key];
         }
     });
-    console.log(pagination, searchFields);
+    return { pagination, searchFields };
 }
 const countriesController = {
     getCountries: (req, res, next) => {
-        checkQueryForParams(req.query);
-        if (!Object.keys(req.query).length) {
+        if (!Object.keys(checkQueryForParams(req.query).searchFields).length) {
+            const pagination = checkQueryForParams(req.query).pagination;
             db_1.default.execute(`SELECT cities.name as cityName, countries.name as countryName, countries.code as countryCode, countries.continent as continent, cities.population as population
             FROM world.city as cities
             LEFT JOIN world.country as countries ON cities.CountryCode = countries.Code`)
@@ -51,7 +51,6 @@ const countriesController = {
         else {
             const searchParamsKeys = Object.keys(req.query).map((key) => `${countries_types_1.ColumnKeyToTable[key]}.${countries_types_1.ResponseToDBParamsMap[key]} = ?`).join(' AND ');
             const searchParamsValues = Object.keys(req.query).map((key) => req.query[key]);
-            console.log(req.query, searchParamsKeys, searchParamsValues);
             db_1.default.execute(`SELECT cities.name as cityName, countries.name as countryName, countries.code as countryCode, countries.continent as continent, cities.population as population
             FROM world.city as cities LEFT JOIN world.country as countries ON cities.CountryCode = countries.Code WHERE ${searchParamsKeys}
 `, searchParamsValues)

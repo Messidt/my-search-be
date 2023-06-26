@@ -4,7 +4,7 @@ const pool = mysql2.createPool({
     host: 'localhost',
     user: 'root',
     database: 'node_complete',
-    password: ''
+    password: 'newDeal#1'
 });
 
 export default pool.promise();
