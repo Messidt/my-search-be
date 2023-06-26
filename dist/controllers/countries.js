@@ -19,15 +19,30 @@ function parseDBRecordToResponse(dbData) {
         };
     });
 }
+function checkQueryForParams(queries) {
+    const paginationKeys = ['pageIndex', 'pageSize'];
+    const pagination = { pageIndex: 0, pageSize: 0 };
+    const searchFields = {};
+    Object.keys(queries)
+        .forEach((key) => {
+        if (paginationKeys.includes(key)) {
+            pagination[key] = queries[key];
+        }
+        else {
+            searchFields[key] = queries[key];
+        }
+    });
+    console.log(pagination, searchFields);
+}
 const countriesController = {
     getCountries: (req, res, next) => {
+        checkQueryForParams(req.query);
         if (!Object.keys(req.query).length) {
             db_1.default.execute(`SELECT cities.name as cityName, countries.name as countryName, countries.code as countryCode, countries.continent as continent, cities.population as population
             FROM world.city as cities
             LEFT JOIN world.country as countries ON cities.CountryCode = countries.Code`)
                 .then((data) => {
                 const responseData = { totalElements: data[0].length, content: parseDBRecordToResponse(data[0]) };
-                console.log(responseData);
                 res.status(200).json(responseData);
             })
                 .catch((err) => {
@@ -41,7 +56,6 @@ const countriesController = {
             FROM world.city as cities LEFT JOIN world.country as countries ON cities.CountryCode = countries.Code WHERE ${searchParamsKeys}
 `, searchParamsValues)
                 .then((data) => {
-                console.log(data);
                 const responseData = { totalElements: data[0].length, content: parseDBRecordToResponse(data[0]) };
                 res.status(200).json(responseData);
             })
